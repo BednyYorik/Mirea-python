@@ -1,0 +1,88 @@
+import struct
+
+
+def structD(data: bytes):
+    uint16Arr = []
+    for i in range(0, 4, 1):
+        a, = struct.unpack(">H", data[44 + i * 2:44 + (i + 1) * 2])
+    uint16Arr.append(a)
+    ui32_1, = struct.unpack(">I", data[52:56])
+    uint64, = struct.unpack(">Q", data[56:64])
+    uint8, = struct.unpack(">B", data[64:65])
+    ui32_2, = struct.unpack(">I", data[65:69])
+    return {'D1': uint16Arr, 'D2': ui32_1,
+    'D3': uint64, 'D4': uint8, 'D5': ui32_2}
+
+
+def structC(data: bytes, address: int):
+    buff = address
+    int64_1, = struct.unpack(">q", data[buff:buff + 8])
+    buff += 8
+    int64_2, = struct.unpack(">q", data[buff:buff + 8])
+    buff += 8
+    int32, = struct.unpack(">i", data[buff:buff + 4])
+    buff += 4
+    int32Arr = []
+    for i in range(0, 4, 1):
+        a, = struct.unpack(">i", data[buff + i * 4:buff + (i + 1) * 4])
+    int32Arr.append(a)
+    buff += 16
+    double, = struct.unpack(">d", data[buff:buff + 8])
+    return {'C1': int64_1, 'C2': int64_2,
+    'C3': int32, 'C4': int32Arr, 'C5': double}
+
+
+def structB(data: bytes):
+    float, = struct.unpack(">f", data[8:12])
+    uint64, = struct.unpack(">Q", data[12:20])
+    charArr = ''
+    for i in range(0, 5, 1):
+        a, = struct.unpack(">c", data[20 + i:21 + i])
+    charArr += chr(a[0])
+    uint8, = struct.unpack(">B", data[25:26])
+    int16, = struct.unpack(">h", data[26:28])
+    return {'B1': float, 'B2': uint64, 'B3': charArr,
+    'B4': uint8, 'B5': int16}
+
+
+def structA(data: bytes):
+    int32, = struct.unpack(">i", data[4:8])
+    strB = structB(data)
+    charArr = ''
+    for i in range(0, 3, 1):
+        a, = struct.unpack(">c", data[28 + i:29 + i])
+    charArr += chr(a[0])
+    int64, = struct.unpack(">q", data[31:39])
+    ui16CStructAdress_1, = struct.unpack(">H", data[39:41])
+    ui16CStructAdress_2, = struct.unpack(">H", data[41:43])
+    structCArray = []
+    structCArray.append(structC(data, ui16CStructAdress_1))
+    structCArray.append(structC(data, ui16CStructAdress_2))
+    uint8, = struct.unpack(">B", data[43:44])
+    strD = structD(data)
+    int8, = struct.unpack(">b", data[69:70])
+    return {'A1': int32, 'A2': strB, 'A3': charArr,
+    'A4': int64, 'A5': structCArray,
+    'A6': uint8, 'A7': strD, 'A8': int8}
+
+
+def main(bytesSequence):
+    return structA(bytesSequence)
+
+
+print(main(b'\xc2CMS\n\x00tjC\x00\x85\xeb\xce\xbc0\xc4\xf4C\xa9\x88\xbb?\x87tc?\x97%'
+ b'\x95\xcd@<\xc1t#\x9f\x0c\x08\x89d8IV\xa1\xa1\xdb\x0b;\xaebQ\xe3{\xe0\xd2\x08'
+ b'\xde5\xc5\x01g\x1f\x03\x00\x1e\x00\x9f\x02U\xc0q\x1a\xebv\xb3\x15'
+ b'\xbe\xbe\xe1x\xcd\x86q\xd1\x12\x03U\x06\x88SA\xd3e\xbf\x03\xf3\xdb\x1dB\xdf'
+ b'N\x98A7\xd6\x82\xd6\xe1&6\x00\xdd\xff\xe4\x05i\xf2\x82\xca\xf3\x95UX\xa4'
+ b'\xac\x1e?'))
+
+# H - uint16 2
+# h - int16 2
+# I - uint32 4
+# i - int32 4
+# b - int8 1
+# B - uint8 1
+# q - int64 8
+# Q - uint64 8
+# f - float 4
